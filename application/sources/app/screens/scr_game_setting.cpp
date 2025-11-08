@@ -32,37 +32,22 @@ void view_scr_game_setting() {
 	view_render.setTextColor(WHITE);
 	// Icon
 	view_render.drawBitmap(	0, \
-							setting_location_chosse - \
-							TT_GAME_SETTING_CHOSSE_ICON_AXIS_Y, \
+							setting_location_chosse,\
 							chosse_icon, \
 							TT_GAME_SETTING_CHOSSE_ICON_SIZE_W, \
 							TT_GAME_SETTING_CHOSSE_ICON_SIZE_H, \
 							WHITE);
-	if (settingdata.silent == 0) {
-		view_render.drawBitmap(	109, 
-								TT_GAME_SETTING_FRAMES_AXIS_Y_1 + \
-								TT_GAME_SETTING_FRAMES_STEP*3-12, \
-								speaker_1, \
-								7, \
-								7, \
-								WHITE);
-	}
-	else {
-		view_render.drawBitmap(	109, \
-								TT_GAME_SETTING_FRAMES_AXIS_Y_1 + \
-								TT_GAME_SETTING_FRAMES_STEP*3-12, \
-								speaker_2, \
-								7, \
-								7, \
-								WHITE);
-	}
+
 	// Frames
+	//Level
 	view_render.drawRoundRect(	TT_GAME_SETTING_FRAMES_AXIS_X, \
 								TT_GAME_SETTING_FRAMES_AXIS_Y_1, \
 								TT_GAME_SETTING_FRAMES_SIZE_W, \
 								TT_GAME_SETTING_FRAMES_SIZE_H, \
 								TT_GAME_SETTING_FRAMES_SIZE_R, \
 								WHITE);
+
+	//Music
 	view_render.drawRoundRect(	TT_GAME_SETTING_FRAMES_AXIS_X, \
 								TT_GAME_SETTING_FRAMES_AXIS_Y_1 + \
 								TT_GAME_SETTING_FRAMES_STEP, \
@@ -70,6 +55,7 @@ void view_scr_game_setting() {
 								TT_GAME_SETTING_FRAMES_SIZE_H, \
 								TT_GAME_SETTING_FRAMES_SIZE_R, \
 								WHITE);
+	//Exit
 	view_render.drawRoundRect(	TT_GAME_SETTING_FRAMES_AXIS_X, \
 								TT_GAME_SETTING_FRAMES_AXIS_Y_1 + \
 								TT_GAME_SETTING_FRAMES_STEP*2, \
@@ -77,28 +63,25 @@ void view_scr_game_setting() {
 								TT_GAME_SETTING_FRAMES_SIZE_H, \
 								TT_GAME_SETTING_FRAMES_SIZE_R, \
 								WHITE);
-	view_render.drawRoundRect(	TT_GAME_SETTING_FRAMES_AXIS_X, \
-								TT_GAME_SETTING_FRAMES_AXIS_Y_1 + \
-								TT_GAME_SETTING_FRAMES_STEP*3, \
-								TT_GAME_SETTING_FRAMES_SIZE_W, \
-								TT_GAME_SETTING_FRAMES_SIZE_H, \
-								TT_GAME_SETTING_FRAMES_SIZE_R, \
-								WHITE);
-	// // Count Arrow
-	// view_render.setCursor(AR_GAME_SETTING_TEXT_AXIS_X, 5);
-	// view_render.print(" Arrows       ( ) ");
-	// view_render.setCursor(AR_GAME_SETTING_NUMBER_AXIS_X, 5);
-	// view_render.print(settingdata.num_arrow);    
-	// // Mine speed
-	// view_render.setCursor(AR_GAME_SETTING_TEXT_AXIS_X, 20);
-	// view_render.print(" Meteoroid sp ( ) ");	
-	// view_render.setCursor(AR_GAME_SETTING_NUMBER_AXIS_X, 20);
-	// view_render.print(settingdata.meteoroid_speed);
-	// Silent
-	view_render.setCursor(TT_GAME_SETTING_TEXT_AXIS_X, 35);
-	view_render.print(" Silent           ");
-	// EXIT
-	view_render.setCursor(TT_GAME_SETTING_TEXT_AXIS_X + 32, 50);
+	// Setting level: 1-10
+	view_render.setCursor(TT_GAME_SETTING_TEXT_AXIS_X, 15);
+	view_render.print(" Level ");
+
+	view_render.setCursor(TT_GAME_SETTING_NUMBER_AXIS_X, 15);
+	view_render.print(settingdata.block_speed);    
+
+	//Setting music: On/Off
+	view_render.setCursor(TT_GAME_SETTING_TEXT_AXIS_X, 30);
+	view_render.print(" Music ");
+	if (settingdata.silent == 0) {
+		view_render.print("ON");
+	}
+	else {
+		view_render.print("OFF");
+	}
+
+	//Setting exit
+	view_render.setCursor(TT_GAME_SETTING_TEXT_AXIS_X, 45);
 	view_render.print(" EXIT ") ;
 	view_render.update();
 }
@@ -113,7 +96,7 @@ void scr_game_setting_handle(ak_msg_t* msg) {
 		// Clear view
 		view_render.clear();
 		// Chosse item arrdess 1
-		setting_location_chosse = SETTING_ITEM_ARRDESS_1;
+		setting_location_chosse = SETTING_ITEM_LEVEL;
 		// Read setting data
 		eeprom_read(	EEPROM_SETTING_START_ADDR, \
 						(uint8_t*)&settingdata, \
@@ -121,95 +104,64 @@ void scr_game_setting_handle(ak_msg_t* msg) {
 	}
 		break;
 
-	// case AC_DISPLAY_BUTTON_MODE_RELEASED: {
-	// 	APP_DBG_SIG("AC_DISPLAY_BUTTON_MODE_RELEASED\n");
-	// 	// Change setting data
-	// 	switch (setting_location_chosse) {
-	// 	// case SETTING_ITEM_ARRDESS_1: {
-	// 	// 	// Change arrow number
-	// 	// 	settingdata.num_arrow++;
-	// 	// 	if (settingdata.num_arrow > 5) {
-	// 	// 		settingdata.num_arrow = 1;
-	// 	// 	}
-	// 	// }
-	// 	// 	break;
+	case AC_DISPLAY_BUTTON_MODE_RELEASED: 
+	{
+		APP_DBG_SIG("AC_DISPLAY_BUTTON_MODE_RELEASED\n");
+		view_render.clear();
+		switch (setting_location_chosse) 
+		{
+		case SETTING_ITEM_LEVEL: 
+			{
+				// Change block speed
+				settingdata.block_speed++;
+				if (settingdata.block_speed > 10) {
+					settingdata.block_speed = 1;
+				}
+			}
+			break;
 
-	// 	// case SETTING_ITEM_ARRDESS_2: {
-	// 	// 	settingdata.meteoroid_speed++;
-	// 	// 	if (settingdata.meteoroid_speed > 5) { 
-	// 	// 		settingdata.meteoroid_speed = 1;
-	// 	// 	}
-	// 	// }
-	// 	// 	break;
+		case SETTING_ITEM_MUSIC: 
+			{
+				settingdata.silent = !settingdata.silent;
+				BUZZER_Sleep(settingdata.silent);
+			}
+			break;
 
-	// 	case SETTING_ITEM_ARRDESS_3: {
-	// 		// Change meteoroid speed
-	// 		settingdata.silent = !settingdata.silent;
-	// 		BUZZER_Sleep(settingdata.silent);
-	// 	}
-	// 		break;
+		case SETTING_ITEM_EXIT: {
+			// Save change and exit
+			eeprom_write(	EEPROM_SETTING_START_ADDR, \
+							(uint8_t*)&settingdata, \
+							sizeof(settingdata));
+			SCREEN_TRAN(scr_menu_game_handle, &scr_menu_game);
+			BUZZER_PlayTones(tones_startup);
+		}
+		}
+	}
+	break;
 
-	// 	case SETTING_ITEM_ARRDESS_4: {
-	// 		// Save change and exit
-	// 		settingdata.arrow_speed = 5;
-	// 		eeprom_write(	EEPROM_SETTING_START_ADDR, \
-	// 						(uint8_t*)&settingdata, \
-	// 						sizeof(settingdata));
-	// 		SCREEN_TRAN(scr_menu_game_handle, &scr_menu_game);
-	// 		BUZZER_PlayTones(tones_startup);
-	// 	}
-	// 		break;
+	case AC_DISPLAY_BUTTON_DOWN_RELEASED:
+	{
+		APP_DBG_SIG("AC_DISPLAY_BUTTON_DOWN_RELEASED");
+		view_render.clear();
 
-	// 	default:
-	// 		break;
-	// 	}
-	// }
-	// 	BUZZER_PlayTones(tones_cc);
-	// 	break;
-	
-	// case AC_DISPLAY_BUTTON_UP_LONG_PRESSED: {
-	// 	APP_DBG_SIG("AC_DISPLAY_BUTTON_UP_LONG_PRESSED\n");
-	// 	// Change data max
-	// 	settingdata.num_arrow = 5;
-	// 	settingdata.meteoroid_speed = 5;
-	// 	settingdata.silent = 0;
-	// }
-	// 	BUZZER_Sleep(settingdata.silent);
-	// 	BUZZER_PlayTones(tones_cc);
-	// 	break;
+		setting_location_chosse += STEP_SETTING_CHOSSE;
+		if(setting_location_chosse > SETTING_ITEM_EXIT)
+		{
+			setting_location_chosse = SETTING_ITEM_LEVEL;
+		}
+	}
+	break;
 
-	// case AC_DISPLAY_BUTTON_UP_RELEASED: {
-	// 	APP_DBG_SIG("AC_DISPLAY_BUTTON_UP_RELEASED\n");
-	// 	// Move up
-	// 	setting_location_chosse -= STEP_SETTING_CHOSSE;
-	// 	if (setting_location_chosse == SETTING_ITEM_ARRDESS_0) { 
-	// 		setting_location_chosse = SETTING_ITEM_ARRDESS_4;
-	// 	}
-	// }
-	// 	BUZZER_PlayTones(tones_cc);
-	// 	break;
-
-	// case AC_DISPLAY_BUTTON_DOWN_LONG_PRESSED: {
-	// 	APP_DBG_SIG("AC_DISPLAY_BUTTON_DOWN_LONG_PRESSED\n");
-	// 	// Change data min
-	// 	settingdata.num_arrow = 1;
-	// 	settingdata.meteoroid_speed = 1;
-	// 	settingdata.silent = 1;
-	// }
-	// 	BUZZER_Sleep(settingdata.silent);
-	// 	BUZZER_PlayTones(tones_cc);
-	// 	break;
-
-	// case AC_DISPLAY_BUTTON_DOWN_RELEASED: {
-	// 	APP_DBG_SIG("AC_DISPLAY_BUTTON_DOWN_RELEASED\n");
-	// 	// Move down
-	// 	setting_location_chosse += STEP_SETTING_CHOSSE;
-	// 	if (setting_location_chosse > SETTING_ITEM_ARRDESS_4) { 
-	// 		setting_location_chosse = SETTING_ITEM_ARRDESS_1;
-	// 	}
-	// }
-	// 	BUZZER_PlayTones(tones_cc);
-	// 	break;
+	case AC_DISPLAY_BUTTON_UP_RELEASED:
+	{
+		APP_DBG_SIG("AC_DISPLAY_BUTTON_UP_RELEASED");
+		setting_location_chosse -= STEP_SETTING_CHOSSE;
+		if(setting_location_chosse < SETTING_ITEM_LEVEL)
+		{
+			setting_location_chosse = SETTING_ITEM_EXIT;
+		}
+	}
+	break;
 
 	default:
 	 	break;
