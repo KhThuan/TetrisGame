@@ -21,18 +21,14 @@ void GameBoard::clear() {
 
 void GameBoard::draw() {
     // Draw border
-    view_render.drawRect(GAME_BOARD_X_OFFSET - 1, 
-                        GAME_BOARD_Y_OFFSET - 1,
-                        GAME_BOARD_WIDTH * BLOCK_SIZE + 1,
-                        GAME_BOARD_HEIGHT * BLOCK_SIZE + 1,
-                        WHITE);
-    
+    view_render.drawRect(0, 0, 128, 64, WHITE);
+
     // Draw locked blocks
-    for (uint8_t i = 0; i < GAME_BOARD_HEIGHT; i++) {
-        for (uint8_t j = 0; j < GAME_BOARD_WIDTH; j++) {
-            if (cells[i][j] != 0) {
-                uint8_t screenX = GAME_BOARD_X_OFFSET + j * BLOCK_SIZE;
-                uint8_t screenY = GAME_BOARD_Y_OFFSET + i * BLOCK_SIZE;
+    for(uint8_t x = 0; x < GAME_BOARD_WIDTH; x++) {
+        for (uint8_t y = 0; y < GAME_BOARD_HEIGHT; y++) {
+            if (cells[y][x] > 0) {
+                uint8_t screenX = GAME_BOARD_X_OFFSET + x * BLOCK_SIZE;
+                uint8_t screenY = GAME_BOARD_Y_OFFSET + y * BLOCK_SIZE;
                 view_render.fillRect(screenX, screenY, BLOCK_SIZE - 1, BLOCK_SIZE - 1, WHITE);
             }
         }
@@ -60,8 +56,8 @@ uint8_t GameBoard::getCell(int8_t x, int8_t y) const {
 }
 
 bool GameBoard::isLineFull(uint8_t line) const {
-    for (uint8_t j = 0; j < GAME_BOARD_WIDTH; j++) {
-        if (cells[line][j] == 0) {
+    for (uint8_t i = 0; i < GAME_BOARD_WIDTH; i++) {
+        if (cells[line][i] == 0) {
             return false;
         }
     }
@@ -77,15 +73,15 @@ void GameBoard::clearLine(uint8_t line) {
     }
     
     // Clear top line
-    for (uint8_t j = 0; j < GAME_BOARD_WIDTH; j++) {
-        cells[0][j] = 0;
+    for (uint8_t i = 0; i < GAME_BOARD_HEIGHT; i++) {
+        cells[0][i] = 0;
     }
 }
 
 uint8_t GameBoard::checkAndClearLines() {
     uint8_t clearedLines = 0;
     
-    for (int8_t i = GAME_BOARD_HEIGHT - 1; i >= 0; i--) {
+    for (int8_t i = GAME_BOARD_WIDTH - 1; i >= 0; i--) {
         if (isLineFull(i)) {
             clearLine(i);
             clearedLines++;
@@ -136,7 +132,7 @@ Block::~Block() {}
 void Block::setup(BlockType blockType) {
     type = blockType;
     rotation = 0;
-    x = GAME_BOARD_WIDTH / 2 - 2;
+    x = GAME_BOARD_X_OFFSET / 2 - 2;
     y = 0;
     visible = true;
     loadShape();
@@ -152,8 +148,9 @@ void Block::draw() {
     for (uint8_t i = 0; i < MATRIX_SIZE; i++) {
         for (uint8_t j = 0; j < MATRIX_SIZE; j++) {
             if ((*shapeData)[rotation][i][j] == 1) {
-                uint8_t screenX = GAME_BOARD_X_OFFSET + (x + j) * BLOCK_SIZE;
-                uint8_t screenY = GAME_BOARD_Y_OFFSET + (y + i) * BLOCK_SIZE;
+
+                uint8_t screenX = (y + j) * BLOCK_SIZE;      
+                uint8_t screenY = (x + i) * BLOCK_SIZE;      
                 
                 view_render.fillRect(screenX, screenY, BLOCK_SIZE - 1, BLOCK_SIZE - 1, WHITE);
                 view_render.drawRect(screenX, screenY, BLOCK_SIZE - 1, BLOCK_SIZE - 1, BLACK);
@@ -168,10 +165,10 @@ bool Block::checkCollision(const GameBoard& board, int8_t offsetX, int8_t offset
     for (uint8_t i = 0; i < MATRIX_SIZE; i++) {
         for (uint8_t j = 0; j < MATRIX_SIZE; j++) {
             if ((*shapeData)[rot][i][j] == 1) {
-                int8_t newX = x + j + offsetX;
-                int8_t newY = y + i + offsetY;
+                int8_t col = y + i + offsetY;
+                int8_t row = x + j + offsetX;
                 
-                if (board.isCellOccupied(newX, newY)) {
+                if (board.isCellOccupied(col, row)) {
                     return true;
                 }
             }
@@ -186,7 +183,7 @@ void Block::lockToBoard(GameBoard& board) {
     for (uint8_t i = 0; i < MATRIX_SIZE; i++) {
         for (uint8_t j = 0; j < MATRIX_SIZE; j++) {
             if ((*shapeData)[rotation][i][j] == 1) {
-                board.setCell(x + j, y + i, type + 1);
+                board.setCell(x + i, y + j, type + 1);
             }
         }
     }
@@ -259,7 +256,6 @@ void Block::handleMoveDown(const GameBoard& board) {
 
 void Block::handleHardDrop(const GameBoard& board) {
     hardDrop(board);
-    BUZZER_PlayTones(tones_cc);
     task_post_pure_msg(TT_GAME_BLOCK_ID, TT_GAME_BLOCK_LOCK);
 }
 
@@ -310,28 +306,30 @@ void GameState::addScore(uint8_t lines) {
 void GameState::drawInfo() {
     view_render.setTextSize(1);
     view_render.setTextColor(WHITE);
-    view_render.setCursor(2, 35);
-    view_render.print("SCORE:");
-    view_render.setCursor(2, 44);
+    view_render.setCursor(1, 5);
+    view_render.print("SCORE");
+    view_render.setCursor(1, 15);
     view_render.print(score);
-    view_render.setCursor(2, 53);
-    view_render.print("LV:");
+    view_render.setCursor(2, 27);
+    view_render.print("LV");
     view_render.print(level);
+    //draw line border
+    view_render.drawLine(35, 0, 35, 64, WHITE);
 }
 
 void GameState::drawNextBlock() {
     view_render.setTextSize(1);
     view_render.setTextColor(WHITE);
-    view_render.setCursor(2, 2);
-    view_render.print("NEXT:");
-    
+    view_render.setCursor(1, 43);
+    view_render.print("NEXT");
+    view_render.fillRect(2, 12, 12, 12, BLACK);
     const uint8_t (*shape)[4][MATRIX_SIZE][MATRIX_SIZE] = SHAPE_DATABASE[nextBlockType];
     
     for (uint8_t i = 0; i < MATRIX_SIZE; i++) {
         for (uint8_t j = 0; j < MATRIX_SIZE; j++) {
             if ((*shape)[0][i][j] == 1) {
-                uint8_t screenX = 2 + j * 3;
-                uint8_t screenY = 12 + i * 3;
+                uint8_t screenX = 10 + j * 3;
+                uint8_t screenY = 55 + i * 3;
                 view_render.fillRect(screenX, screenY, 2, 2, WHITE);
             }
         }
