@@ -22,7 +22,7 @@ struct menu_items{
 
 // Menu items name
 static char menu_items_name[NUMBER_MENU_ITEMS][20] = {
-	"   Play Game   ",		// item 1
+	"   Play  ",		// item 1
 	"   Setting        ",		// item 2
 	"   Charts         ",		// item 3
 	"   Exit           ",		// item 4
@@ -82,9 +82,9 @@ typedef struct {
 
 // Frames
 typedef struct {
-	uint8_t axis_x = 50;
+	uint8_t axis_x = 64;
 	uint8_t axis_y = 0;
-	uint8_t size_w = 123;
+	uint8_t size_w = 100;
 	uint8_t size_h = 20;
 	uint8_t size_r = 3;
 } scr_menu_frames_t;
@@ -116,13 +116,12 @@ view_screen_t scr_menu_game = {
 };
 
 void view_scr_menu_game() {
-#define AR_GAME_MENU_ICON_AXIS_X			(7)
-#define AR_GAME_MENU_TEXT_AXIS_X			(20)
+#define TT_GAME_MENU_ICON_AXIS_X			(67)
+#define TT_GAME_MENU_TEXT_AXIS_X			(65)
 	// Scroll bar
 	view_render.setCursor(16, 35);
 	view_render.setTextColor(BLACK);
 	view_render.setTextSize(2);
-	view_render.print("TETRIS");
 	view_render.fillRect(	scroll_bar.axis_x - 1, \
 							scroll_bar.axis_y, \
 							scroll_bar.size_W, \
@@ -134,6 +133,14 @@ void view_scr_menu_game() {
 							1, \
 							SCREEN_MENU_H, \
 							WHITE);
+	//Tetris Game
+	view_render.setTextColor(1);
+	view_render.setTextColor(WHITE);
+	view_render.setCursor(3, 15);
+	view_render.print("TE");
+	view_render.setCursor(3, 40);
+	view_render.print("TRIS");
+
 	// Frame White
 	view_render.fillRoundRect(	frame_white.axis_x, \
 								frame_white.axis_y, \
@@ -150,7 +157,7 @@ void view_scr_menu_game() {
 									frame[i].size_r, \
 									WHITE);
 	// Icon
-		view_render.drawBitmap(	AR_GAME_MENU_ICON_AXIS_X, \
+		view_render.drawBitmap(	TT_GAME_MENU_ICON_AXIS_X, \
 								menu_items_icon_axis_y[i], \
 								menu_items_icon[screen_menu.screen + i], \
 								menu_items_icon_size_w[screen_menu.screen + i], \
@@ -161,7 +168,7 @@ void view_scr_menu_game() {
 	view_render.setTextSize(1);
 	for (uint8_t i = 0; i < 3; i++) {
 		view_render.setTextColor(menu_items_icon_color[screen_menu.screen + i]);
-		view_render.setCursor(AR_GAME_MENU_TEXT_AXIS_X, menu_items_icon_axis_y[i]+5);
+		view_render.setCursor(TT_GAME_MENU_TEXT_AXIS_X, menu_items_icon_axis_y[i]+5);
 		view_render.print(menu_items_name[screen_menu.screen + i]);
 	}
 }
