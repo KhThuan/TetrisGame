@@ -73,7 +73,7 @@ void GameBoard::clearLine(uint8_t line) {
     }
     
     // Clear top line
-    for (uint8_t i = 0; i < GAME_BOARD_HEIGHT; i++) {
+    for (uint8_t i = 0; i < GAME_BOARD_WIDTH; i++) {
         cells[0][i] = 0;
     }
 }
@@ -81,7 +81,7 @@ void GameBoard::clearLine(uint8_t line) {
 uint8_t GameBoard::checkAndClearLines() {
     uint8_t clearedLines = 0;
     
-    for (int8_t i = GAME_BOARD_WIDTH - 1; i >= 0; i--) {
+    for (int8_t i = GAME_BOARD_HEIGHT - 1; i >= 0; i--) {
         if (isLineFull(i)) {
             clearLine(i);
             clearedLines++;
@@ -102,7 +102,7 @@ void GameBoard::handleCheckLines() {
     if (cleared > 0) {
         // Post message to state to update score
         getTetrisGameManager()->getState()->handleLinesCleared(cleared);
-        BUZZER_PlayTones(tones_BUM);
+        //BUZZER_PlayTones(tones_BUM);
     }
     
     // Spawn new block
@@ -132,7 +132,7 @@ Block::~Block() {}
 void Block::setup(BlockType blockType) {
     type = blockType;
     rotation = 0;
-    x = GAME_BOARD_X_OFFSET / 2 - 2;
+    x = (GAME_BOARD_WIDTH / 2) - (MATRIX_SIZE / 2);
     y = 0;
     visible = true;
     loadShape();
@@ -149,8 +149,13 @@ void Block::draw() {
         for (uint8_t j = 0; j < MATRIX_SIZE; j++) {
             if ((*shapeData)[rotation][i][j] == 1) {
 
-                uint8_t screenX = (y + j) * BLOCK_SIZE;      
-                uint8_t screenY = (x + i) * BLOCK_SIZE;      
+                // SỬA 2 DÒNG NÀY:
+                // uint8_t screenX = (x + i) * BLOCK_SIZE;      // <--- LỖI
+                // uint8_t screenY = (y + j) * BLOCK_SIZE;      // <--- LỖI
+                
+                // SỬA ĐÚNG:
+                uint8_t screenX = GAME_BOARD_X_OFFSET + (x + i) * BLOCK_SIZE; 
+                uint8_t screenY = GAME_BOARD_Y_OFFSET + (y + j) * BLOCK_SIZE; 
                 
                 view_render.fillRect(screenX, screenY, BLOCK_SIZE - 1, BLOCK_SIZE - 1, WHITE);
                 view_render.drawRect(screenX, screenY, BLOCK_SIZE - 1, BLOCK_SIZE - 1, BLACK);
@@ -165,8 +170,8 @@ bool Block::checkCollision(const GameBoard& board, int8_t offsetX, int8_t offset
     for (uint8_t i = 0; i < MATRIX_SIZE; i++) {
         for (uint8_t j = 0; j < MATRIX_SIZE; j++) {
             if ((*shapeData)[rot][i][j] == 1) {
-                int8_t col = y + i + offsetY;
-                int8_t row = x + j + offsetX;
+                int8_t col = x + i + offsetX;
+                int8_t row = y + j + offsetY;
                 
                 if (board.isCellOccupied(col, row)) {
                     return true;
@@ -202,7 +207,7 @@ bool Block::rotate(const GameBoard& board) {
 
 bool Block::moveLeft(const GameBoard& board) {
     if (!checkCollision(board, -1, 0, rotation)) {
-        x--;
+        x++;
         return true;
     }
     return false;
@@ -210,7 +215,7 @@ bool Block::moveLeft(const GameBoard& board) {
 
 bool Block::moveRight(const GameBoard& board) {
     if (!checkCollision(board, 1, 0, rotation)) {
-        x++;
+        x--;
         return true;
     }
     return false;
@@ -236,7 +241,7 @@ void Block::handleSetup(BlockType blockType) {
 
 void Block::handleRotate(const GameBoard& board) {
     if (rotate(board)) {
-        BUZZER_PlayTones(tones_cc);
+        //BUZZER_PlayTones(tones_cc);
     }
 }
 
@@ -261,7 +266,7 @@ void Block::handleHardDrop(const GameBoard& board) {
 
 void Block::handleLock(GameBoard& board) {
     lockToBoard(board);
-    BUZZER_PlayTones(tones_cc);
+    //BUZZER_PlayTones(tones_cc);
     task_post_pure_msg(TT_GAME_BOARD_ID, TT_GAME_BOARD_CHECK_LINES);
 }
 
@@ -439,7 +444,7 @@ void TetrisGameManager::handleGameReset() {
 void TetrisGameManager::handleSpawnBlock() {
     currentBlock->handleSetup(state->getNextBlockType());
     state->generateNextBlockType();
-    state->handleCheckGameOver(*currentBlock, *board);
+    task_post_pure_msg(TT_GAME_STATE_ID, TT_GAME_STATE_CHECK_GAME_OVER);
 }
 
 /*==================== TASK HANDLERS (Event-Driven) ====================*/
