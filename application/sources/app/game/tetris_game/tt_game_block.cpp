@@ -148,15 +148,8 @@ void Block::draw() {
     for (uint8_t i = 0; i < MATRIX_SIZE; i++) {
         for (uint8_t j = 0; j < MATRIX_SIZE; j++) {
             if ((*shapeData)[rotation][i][j] == 1) {
-
-                // SỬA 2 DÒNG NÀY:
-                // uint8_t screenX = (x + i) * BLOCK_SIZE;      // <--- LỖI
-                // uint8_t screenY = (y + j) * BLOCK_SIZE;      // <--- LỖI
-                
-                // SỬA ĐÚNG:
                 uint8_t screenX = GAME_BOARD_X_OFFSET + (x + i) * BLOCK_SIZE; 
-                uint8_t screenY = GAME_BOARD_Y_OFFSET + (y + j) * BLOCK_SIZE; 
-                
+                uint8_t screenY = GAME_BOARD_Y_OFFSET + (y + j) * BLOCK_SIZE;   
                 view_render.fillRect(screenX, screenY, BLOCK_SIZE - 1, BLOCK_SIZE - 1, WHITE);
                 view_render.drawRect(screenX, screenY, BLOCK_SIZE - 1, BLOCK_SIZE - 1, BLACK);
             }
@@ -172,7 +165,6 @@ bool Block::checkCollision(const GameBoard& board, int8_t offsetX, int8_t offset
             if ((*shapeData)[rot][i][j] == 1) {
                 int8_t col = x + i + offsetX;
                 int8_t row = y + j + offsetY;
-                
                 if (board.isCellOccupied(col, row)) {
                     return true;
                 }
