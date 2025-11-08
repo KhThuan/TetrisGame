@@ -20,10 +20,10 @@
 
 #define MATRIX_SIZE  4
 #define BLOCK_SIZE  6
-#define GAME_BOARD_WIDTH 10
-#define GAME_BOARD_HEIGHT 19
-#define GAME_BOARD_X_OFFSET 1
-#define GAME_BOARD_Y_OFFSET 12
+#define GAME_BOARD_WIDTH 15
+#define GAME_BOARD_HEIGHT 17
+#define GAME_BOARD_X_OFFSET 35
+#define GAME_BOARD_Y_OFFSET 0
 
 enum BlockType
 {
