@@ -154,7 +154,7 @@ enum {
 /*****************************************************************************/
 /* define timer */
 #define TT_GAME_TIME_TICK_INTERVAL									(100)
-#define TT_GAME_TIME_EXIT_INTERVAL									(3000)
+#define TT_GAME_TIME_EXIT_INTERVAL									(300)
 /* define signal */
 enum {
 	TT_GAME_INITIAL_SETUP = AK_USER_DEFINE_SIG,
