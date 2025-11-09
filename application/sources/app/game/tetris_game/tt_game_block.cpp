@@ -55,6 +55,7 @@ uint8_t GameBoard::getCell(int8_t x, int8_t y) const {
     return 0;
 }
 
+//Check row full
 bool GameBoard::isLineFull(uint8_t line) const {
     for (uint8_t i = 0; i < GAME_BOARD_WIDTH; i++) {
         if (cells[line][i] == 0) {
@@ -78,6 +79,7 @@ void GameBoard::clearLine(uint8_t line) {
     }
 }
 
+//Check and deleted row full
 uint8_t GameBoard::checkAndClearLines() {
     uint8_t clearedLines = 0;
     
@@ -85,7 +87,7 @@ uint8_t GameBoard::checkAndClearLines() {
         if (isLineFull(i)) {
             clearLine(i);
             clearedLines++;
-            i++; // Check the same line again
+            i++; 
         }
     }
     
@@ -96,17 +98,19 @@ void GameBoard::handleSetup() {
     clear();
 }
 
+//Check row deleted and add score
 void GameBoard::handleCheckLines() {
     uint8_t cleared = checkAndClearLines();
-    
-    if (cleared > 0) {
-        // Post message to state to update score
-        getTetrisGameManager()->getState()->handleLinesCleared(cleared);
-        //BUZZER_PlayTones(tones_BUM);
+    if(cleared > 0)
+    {
+        task_post_data(TT_GAME_STATE_ID, 
+                       TT_GAME_STATE_LINES_CLEARED,
+                       &cleared,
+                       sizeof(cleared));
     }
-    
-    // Spawn new block
-    task_post_pure_msg(TT_GAME_SCREEN_ID, TT_GAME_SPAWN_BLOCK);
+    if (!getTetrisGameManager()->getState()->getIsGameOver()) {
+        task_post_pure_msg(TT_GAME_SCREEN_ID, TT_GAME_SPAWN_BLOCK);
+    }
 }
 
 void GameBoard::handleReset() {
@@ -157,6 +161,7 @@ void Block::draw() {
     }
 }
 
+//Check collision with board and block else
 bool Block::checkCollision(const GameBoard& board, int8_t offsetX, int8_t offsetY, uint8_t rot) const {
     if (shapeData == nullptr) return true;
     
@@ -174,6 +179,7 @@ bool Block::checkCollision(const GameBoard& board, int8_t offsetX, int8_t offset
     return false;
 }
 
+//Lock to block with board
 void Block::lockToBoard(GameBoard& board) {
     if (shapeData == nullptr) return;
     
@@ -199,7 +205,7 @@ bool Block::rotate(const GameBoard& board) {
 
 bool Block::moveLeft(const GameBoard& board) {
     if (!checkCollision(board, -1, 0, rotation)) {
-        x++;
+        x--;
         return true;
     }
     return false;
@@ -207,7 +213,7 @@ bool Block::moveLeft(const GameBoard& board) {
 
 bool Block::moveRight(const GameBoard& board) {
     if (!checkCollision(board, 1, 0, rotation)) {
-        x--;
+        x++;
         return true;
     }
     return false;
@@ -221,11 +227,11 @@ bool Block::moveDown(const GameBoard& board) {
     return false;
 }
 
-void Block::hardDrop(const GameBoard& board) {
-    while (!checkCollision(board, 0, 1, rotation)) {
-        y++;
-    }
-}
+// void Block::hardDrop(const GameBoard& board) {
+//     while (!checkCollision(board, 0, 1, rotation)) {
+//         y++;
+//     }
+// }
 
 void Block::handleSetup(BlockType blockType) {
     setup(blockType);
@@ -233,7 +239,6 @@ void Block::handleSetup(BlockType blockType) {
 
 void Block::handleRotate(const GameBoard& board) {
     if (rotate(board)) {
-        //BUZZER_PlayTones(tones_cc);
     }
 }
 
@@ -258,7 +263,6 @@ void Block::handleHardDrop(const GameBoard& board) {
 
 void Block::handleLock(GameBoard& board) {
     lockToBoard(board);
-    //BUZZER_PlayTones(tones_cc);
     task_post_pure_msg(TT_GAME_BOARD_ID, TT_GAME_BOARD_CHECK_LINES);
 }
 
@@ -310,6 +314,7 @@ void GameState::drawInfo() {
     view_render.setCursor(2, 27);
     view_render.print("LV");
     view_render.print(level);
+
     //draw line border
     view_render.drawLine(35, 0, 35, 64, WHITE);
 }
@@ -354,7 +359,7 @@ void GameState::handleSetup() {
 void GameState::handleCheckGameOver(const Block& currentBlock, const GameBoard& board) {
     if (currentBlock.checkCollision(board, 0, 0, currentBlock.getRotation())) {
         isGameOver = true;
-        task_post_pure_msg(TT_GAME_SCREEN_ID, TT_GAME_STATE_CHECK_GAME_OVER);
+        task_post_pure_msg(TT_GAME_SCREEN_ID, TT_GAME_EXIT_GAME);
     }
 }
 
@@ -381,6 +386,7 @@ TetrisGameManager::~TetrisGameManager() {
     if (state) delete state;
 }
 
+/*Hàm đảm bảo chỉ có 1 đối tượng của Tetris Manager được tồn tại*/
 TetrisGameManager* TetrisGameManager::getInstance() {
     if (instance == nullptr) {
         instance = new TetrisGameManager();
