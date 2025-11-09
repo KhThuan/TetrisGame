@@ -23,18 +23,18 @@ Phần mô tả sau đây về **“Archery game”** , giải thích cách chơ
 
 Trò chơi bắt đầu bằng màn hình **Menu game** với các lựa chọn sau: 
 - **Play:** Chọn vào để bắt đầu chơi game.
-- **Setting:** Chọn vào để cài đặt các thông số của game.
+- **Setting:** Chọn vào để cài đặt các thông số của game level (1-10), music (ON/OFF).
 - **Charts:** Chọn vào để xem top 3 điểm cao nhất đạt được.
 - **Exit:** Thoát menu vào màn hình chờ.
 
 
 #### 1.2.1 Các đối tượng (Object) trong game:
-|Đối tượng|Tên đối tượng|Ý nghĩa|
-|---|---|---|
-|**Tetromino**|Block|Gồm 7 khối và di chuyển từ trên xuống|
-|**Board**|Board|Lưới chơi|
-|**Game State**|Trạng thái game|Hoạt động dựa trên các tín hiệu|
-|**Tetris Game Manager**|Lớp quản lý|Lớp trung tâm được các task sử dụng trong quá trình xử lý dữ liệu|
+|Đối tượng|Ý nghĩa|
+|---|---|
+|**Tetromino**|Gồm 1 trong 7 khối Tetromino di chuyển từ trên xuống|
+|**Board**|Nơi chứa các Block rơi xuống|
+|**Game State**|Hoạt động dựa trên các tín hiệu|
+|**Tetris Game Manager**|Lớp trung tâm được các task sử dụng trong quá trình xử lý dữ liệu|
 
 
 #### 1.2.2 Cách chơi game: 
@@ -112,107 +112,34 @@ Việc liệt kê các thuộc tính của đối tượng trong game có các t
 - Giúp xác định cấu trúc dữ liệu phù hợp để lưu trữ thông tin của đối tượng.
 - Khi bạn xác định trước các thuộc tính cần thiết, bạn giảm thiểu khả năng bỏ sót hoặc nhầm lẫn trong việc xử lý và sử dụng các thuộc tính.
 
-class GameBoard {
-private:
-    uint8_t cells[GAME_BOARD_HEIGHT][GAME_BOARD_WIDTH];
-    bool isLineFull(uint8_t line) const;
-    void clearLine(uint8_t line);
-public:
-    GameBoard();
-    ~GameBoard();
-    
-    void clear();
-    void draw();
-    bool isCellOccupied(int8_t x, int8_t y) const;
-    void setCell(int8_t x, int8_t y, uint8_t value);
-    uint8_t getCell(int8_t x, int8_t y) const;
-    uint8_t checkAndClearLines();
-    
-    // Event handlers
-    void handleSetup();
-    void handleCheckLines();
-    void handleReset();
-};
+#### 2.2 Task và Signal trong game.
+|TASK ID|PRIORITY|HANDLER|
+|TT_GAME_BLOCK_ID|TASK_PRI_LEVEL_4|tt_game_block_handle|
+|TT_GAME_BOARD_ID|TASK_PRI_LEVEL_4|tt_game_broad_handle|
+|TT_GAME_STATE_ID|TASK_PRI_LEVEL_4|tt_game_state_handle|
+|TT_GAME_SCREEN_ID|TASK_PRI_LEVEL_4|scr_tetris_game_handle|
 
-class Block {
-private:
-    int8_t x, y;
-    uint8_t rotation;
-    BlockType type;
-    bool visible;
-    const uint8_t (*shapeData)[4][MATRIX_SIZE][MATRIX_SIZE];
-    private:
-    void loadShape();
-    
-public:
-    Block();
-    Block(BlockType blockType);
-    ~Block();
-    
-    void setup(BlockType blockType);
-    void draw();
-    bool checkCollision(const GameBoard& board, int8_t offsetX, int8_t offsetY, uint8_t rot) const;
-    void lockToBoard(GameBoard& board);
-    
-    // Button methods
-    bool rotate(const GameBoard& board);
-    bool moveLeft(const GameBoard& board);
-    bool moveRight(const GameBoard& board);
-    bool moveDown(const GameBoard& board);
-    void hardDrop(const GameBoard& board);
-    //bool moveUp(const GameBoard& board);
-    
-    // Event handlers
-    void handleSetup(BlockType blockType);
-    void handleRotate(const GameBoard& board);
-    void handleMoveLeft(const GameBoard& board);
-    void handleMoveRight(const GameBoard& board);
-    void handleMoveDown(const GameBoard& board);
-    void handleHardDrop(const GameBoard& board);
-    void handleLock(GameBoard& board);
-    void handleReset();
+Task ID: Mỗi task được tạo ra cho một đối tượng khác nhau trong hệ thống và có nhiệm vụ nhận các công việc khác nhau. Các task hoàn toàn tách biệt luồng logic với nhau.
 
-    //void handleMoveUp(const GameBoard& board);
-    
-    // Getters
-    int8_t getX() const { return x; }
-    int8_t getY() const { return y; }
-    uint8_t getRotation() const { return rotation; }
-    BlockType getType() const { return type; }
-    bool isVisible() const { return visible; }
-};
+Priority: Mức độ ưu tiên của các task. Các task có cùng độ ưu tiên đều có sự kiện thì hệ thống xử lý task nào vào trước.
 
-class GameState {
-private:
-    uint32_t score;
-    uint32_t level;
-    uint32_t linesCleared;
-    bool isGameOver;
-    BlockType nextBlockType;
-    
-public:
-    GameState();
-    ~GameState();
-    
-    void init();
-    void reset();
-    void addScore(uint8_t lines);
-    void saveScore();
-    void drawInfo();
-    void drawNextBlock();
-    void drawGameOver();
-    
-    // Event handlers
-    void handleSetup();
-    void handleCheckGameOver(const Block& currentBlock, const GameBoard& board);
-    void handleReset();
-    void handleLinesCleared(uint8_t lines);
-    
-    // Getters
-    uint32_t getScore() const { return score; }
-    uint32_t getLevel() const { return level; }
-    uint32_t getLinesCleared() const { return linesCleared; }
-Block
+Handler: Nơi xử lí các tín hiệu của sự kiện khi xảy ra tác động.
+
+Signal: Mỗi task sẽ có nhiều signal khác nhau nhằm mục đích xử lí các nhiệm vụ khác nhau của mỗ đối tượng.
+
+Có 2 loại Messenger khác nhau:
+- Loại chỉ mang theo signal không chứa data.
+- Loại chứa cả signal và data.
+
+
+Game được chia làm 3 phần chính:
+
+**Phần 1**: Quá trình cài đặt thông số cho các đối tượng trong game và timer cho đối tượng trong game.
+
+**Phần 2**: Quá trình bắt đầu game chạy.
+
+
+**Phần 3**: Quá trình game kết thúc.
 
 ## III. Hướng dẫn chi tiết code trong đối tượng
 ### 3.1 Block
