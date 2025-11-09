@@ -61,7 +61,8 @@ Trò chơi bắt đầu bằng màn hình **Menu game** với các lựa chọn 
 ## II. Thiết kế - TETRIS GAME
 ### 2.1 Sơ đồ trình tự
 **Sơ đồ trình tự** được sử dụng để mô tả trình tự của các Message và luồng tương tác giữa các đối tượng trong một hệ thống.
-
+<p align="center"><img src="resources/bin/image.png" alt="menu game" width="480"/></p>
+<p align="center"><strong><em>Hình 2:</em></strong> Sequence after game on</p>
 ### Ghi chú:
 **SCREEN_ENTRY:** Cài đặt các đối tượng trong game.
 - TT_GAME_BOARD_SETUP: Thiết lập thông số ban đầu cho Board.
@@ -111,31 +112,142 @@ Việc liệt kê các thuộc tính của đối tượng trong game có các t
 - Giúp xác định cấu trúc dữ liệu phù hợp để lưu trữ thông tin của đối tượng.
 - Khi bạn xác định trước các thuộc tính cần thiết, bạn giảm thiểu khả năng bỏ sót hoặc nhầm lẫn trong việc xử lý và sử dụng các thuộc tính.
 
-**Trạng thái** của một đối tượng được biểu diễn bởi các **thuộc tính**. Trong trò chơi này các đối tượng có các thuộc tính cụ thể là:
-- **visible:** Quy định hiển thị, ẩn/hiện của đối tượng.
-- **x, y:** Quy định vị trí của đối tượng trên màn hình.
-- **action_image:** Quy định hoạt ảnh tạo animation.
+class GameBoard {
+private:
+    uint8_t cells[GAME_BOARD_HEIGHT][GAME_BOARD_WIDTH];
+    bool isLineFull(uint8_t line) const;
+    void clearLine(uint8_t line);
+public:
+    GameBoard();
+    ~GameBoard();
+    
+    void clear();
+    void draw();
+    bool isCellOccupied(int8_t x, int8_t y) const;
+    void setCell(int8_t x, int8_t y, uint8_t value);
+    uint8_t getCell(int8_t x, int8_t y) const;
+    uint8_t checkAndClearLines();
+    
+    // Event handlers
+    void handleSetup();
+    void handleCheckLines();
+    void handleReset();
+};
 
-Ví dụ:
+class Block {
+private:
+    int8_t x, y;
+    uint8_t rotation;
+    BlockType type;
+    bool visible;
+    const uint8_t (*shapeData)[4][MATRIX_SIZE][MATRIX_SIZE];
+    private:
+    void loadShape();
+    
+public:
+    Block();
+    Block(BlockType blockType);
+    ~Block();
+    
+    void setup(BlockType blockType);
+    void draw();
+    bool checkCollision(const GameBoard& board, int8_t offsetX, int8_t offsetY, uint8_t rot) const;
+    void lockToBoard(GameBoard& board);
+    
+    // Button methods
+    bool rotate(const GameBoard& board);
+    bool moveLeft(const GameBoard& board);
+    bool moveRight(const GameBoard& board);
+    bool moveDown(const GameBoard& board);
+    void hardDrop(const GameBoard& board);
+    //bool moveUp(const GameBoard& board);
+    
+    // Event handlers
+    void handleSetup(BlockType blockType);
+    void handleRotate(const GameBoard& board);
+    void handleMoveLeft(const GameBoard& board);
+    void handleMoveRight(const GameBoard& board);
+    void handleMoveDown(const GameBoard& board);
+    void handleHardDrop(const GameBoard& board);
+    void handleLock(GameBoard& board);
+    void handleReset();
 
-    typedef struct {
-        bool visible;
-        uint32_t x, y;
-        uint8_t action_image;
-    } ar_game_archery_t;
+    //void handleMoveUp(const GameBoard& board);
+    
+    // Getters
+    int8_t getX() const { return x; }
+    int8_t getY() const { return y; }
+    uint8_t getRotation() const { return rotation; }
+    BlockType getType() const { return type; }
+    bool isVisible() const { return visible; }
+};
 
-    extern ar_game_archery_t archery;
+class GameState {
+private:
+    uint32_t score;
+    uint32_t level;
+    uint32_t linesCleared;
+    bool isGameOver;
+    BlockType nextBlockType;
+    
+public:
+    GameState();
+    ~GameState();
+    
+    void init();
+    void reset();
+    void addScore(uint8_t lines);
+    void saveScore();
+    void drawInfo();
+    void drawNextBlock();
+    void drawGameOver();
+    
+    // Event handlers
+    void handleSetup();
+    void handleCheckGameOver(const Block& currentBlock, const GameBoard& board);
+    void handleReset();
+    void handleLinesCleared(uint8_t lines);
+    
+    // Getters
+    uint32_t getScore() const { return score; }
+    uint32_t getLevel() const { return level; }
+    uint32_t getLinesCleared() const { return linesCleared; }
+    bool getIsGameOver() const { return isGameOver; }
+    BlockType getNextBlockType() const { return nextBlockType; }
+    
+    // Setters
+    void setGameOver(bool value) { isGameOver = value; }
+    void generateNextBlockType();
+};
 
-**Áp dụng struct cho các đối tượng:**
-|struct|Các biến|
-|------|--------|
-|ar_game_archery_t|archery|
-|ar_game_arrow_t|arrow[MAX_NUM_ARROW]|
-|ar_game_bang_t|bang[NUM_BANG]|
-|ar_game_border_t|border|
-|ar_game_meteoroid_t|meteoroid[NUM_METEOROIDS]|
+class TetrisGameManager
+{
+private:
+    static TetrisGameManager* instance;
+    GameBoard* board;
+    Block* currentBlock;
+    GameState* state;
 
-**(*)** Các đối tượng có số lượng nhiều thì sẽ được khai báo dạng mảng.
+    TetrisGameManager();
+
+public:
+    ~TetrisGameManager();
+    static TetrisGameManager* getInstance();
+    static void destroyInstance();
+
+    void init();
+    void update();
+    void render();
+
+    GameBoard* getBoard() {return board;}
+    GameState* getState() {return state;}
+    Block* getCurrentBlock() {return currentBlock;}
+
+    void handleGameSetup();
+    void handleGameUpdate();
+    void handleGameReset();
+    void handleSpawnBlock();
+};
 
 **Các biến quan trọng:**
 - **ar_game_score:** Điểm của trò chơi.
