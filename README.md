@@ -62,9 +62,6 @@ Trò chơi bắt đầu bằng màn hình **Menu game** với các lựa chọn 
 ### 2.1 Sơ đồ trình tự
 **Sơ đồ trình tự** được sử dụng để mô tả trình tự của các Message và luồng tương tác giữa các đối tượng trong một hệ thống.
 
-<p align="center"><img src="https://github.com/epcbtech/archery-game/blob/main/resources/images/sequence_object/archery_game_UML.webp" alt="archery game UML" width="720"/></p>
-<p align="center"><strong><em>Hình 5:</em></strong> The sequence diagram</p>
-
 ### Ghi chú:
 **SCREEN_ENTRY:** Cài đặt các đối tượng trong game.
 - TT_GAME_BOARD_SETUP: Thiết lập thông số ban đầu cho Board.
@@ -157,8 +154,6 @@ Ví dụ:
 ### 3.1 Block
 **Sequence diagram:**
 
-<p align="center"><img src="https://github.com/epcbtech/archery-game/blob/main/resources/images/sequence_object/archery_sequence.webp" alt="archery sequence" width="640"/></p>
-<p align="center"><strong><em>Hình 8:</em></strong> Archery sequence</p>
 
 **Tóm tắt nguyên lý:** Tetris sẽ nhận Signal thông được gửi từ 2 nguồn là Screen và Button. Quá trình xử lý của đối tượng phần làm 3 giai đoạn:
 - **Giai đoạn 1:** Bắt đầu game, cài đặt các thông số của Tetris như vị trí và hình ảnh.
