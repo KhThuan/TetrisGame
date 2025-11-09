@@ -212,55 +212,7 @@ public:
     uint32_t getScore() const { return score; }
     uint32_t getLevel() const { return level; }
     uint32_t getLinesCleared() const { return linesCleared; }
-    bool getIsGameOver() const { return isGameOver; }
-    BlockType getNextBlockType() const { return nextBlockType; }
-    
-    // Setters
-    void setGameOver(bool value) { isGameOver = value; }
-    void generateNextBlockType();
-};
-
-class TetrisGameManager
-{
-private:
-    static TetrisGameManager* instance;
-    GameBoard* board;
-    Block* currentBlock;
-    GameState* state;
-
-    TetrisGameManager();
-
-public:
-    ~TetrisGameManager();
-    static TetrisGameManager* getInstance();
-    static void destroyInstance();
-
-    void init();
-    void update();
-    void render();
-
-    GameBoard* getBoard() {return board;}
-    GameState* getState() {return state;}
-    Block* getCurrentBlock() {return currentBlock;}
-
-    void handleGameSetup();
-    void handleGameUpdate();
-    void handleGameReset();
-    void handleSpawnBlock();
-};
-
-**Các biến quan trọng:**
-- **ar_game_score:** Điểm của trò chơi.
-- **ar_game_status:** Trạng thái quả trò chơi.
-  - GAME_OFF: Tắt .
-  - GAME_ON: Bật.
-  - GAME_OVER: Đã thua.
-
-- **ar_game_setting_t** settingsetup : Cấu hình cấp độ của trò chơi.
-  - settingsetup.silent : Bật/tắt chế độ im lặng.
-  - settingsetup.num_arrow : Cấu hình số lượng mũi tên.
-  - settingsetup.arrow_speed : Cấu hình tốc độ mũi tên.
-  - settingsetup.meteoroid_speed : Cấu hình tốc độ của thiên thạch.
+Block
 
 ## III. Hướng dẫn chi tiết code trong đối tượng
 ### 3.1 Block
