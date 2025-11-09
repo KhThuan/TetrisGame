@@ -14,6 +14,8 @@
 #include "task_list.h"
 #include "task_display.h"
 #include "view_render.h"
+#include "eeprom.h"
+#include "app_eeprom.h"
 
 #include "scr_tetris_game.h"
 #include "screens.h"
@@ -21,9 +23,9 @@
 #define MATRIX_SIZE  4
 #define BLOCK_SIZE  6
 #define GAME_BOARD_WIDTH 15
-#define GAME_BOARD_HEIGHT 17
-#define GAME_BOARD_X_OFFSET 35
-#define GAME_BOARD_Y_OFFSET 0
+#define GAME_BOARD_HEIGHT 9
+#define GAME_BOARD_X_OFFSET 36
+#define GAME_BOARD_Y_OFFSET 10
 
 enum BlockType
 {
@@ -39,24 +41,24 @@ enum BlockType
 
 /*=================DATA BASE BLOCK====================*/
 static const uint8_t I_SHAPES[4][MATRIX_SIZE][MATRIX_SIZE] = {
-    {{0,0,0,0}, {1,1,1,1}, {0,0,0,0}, {0,0,0,0}}, //Rotation 0
-    {{0,0,1,0}, {0,0,1,0}, {0,0,1,0}, {0,0,1,0}}, //Rotation 90
-    {{0,0,0,0}, {0,0,0,0}, {1,1,1,1}, {0,0,0,0}}, //Rotation 180
-    {{0,1,0,0}, {0,1,0,0}, {0,1,0,0}, {0,1,0,0}} //Rotation 270
+    {{1,1,1,1}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}},
+    {{0,0,1,0}, {0,0,1,0}, {0,0,1,0}, {0,0,1,0}}, 
+    {{1,1,1,1}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}}, 
+    {{0,1,0,0}, {0,1,0,0}, {0,1,0,0}, {0,1,0,0}} 
 };
 
 static const uint8_t J_SHAPES[4][MATRIX_SIZE][MATRIX_SIZE] = 
 {
-    {{1,0,0,0}, {1,1,1,0}, {0,0,0,0}, {0,0,0,0}}, //
-    {{0,1,1,0}, {0,1,0,0}, {0,1,0,0}, {0,0,0,0}}, //
-    {{0,0,0,0}, {1,1,1,0}, {0,0,1,0}, {0,0,0,0}},
+    {{1,0,0,0}, {1,1,1,0}, {0,0,0,0}, {0,0,0,0}}, 
+    {{0,1,1,0}, {0,1,0,0}, {0,1,0,0}, {0,0,0,0}},
+    {{1,1,1,0}, {0,0,1,0}, {0,0,0,0}, {0,0,0,0}},
     {{0,1,0,0}, {0,1,0,0}, {1,1,0,0}, {0,0,0,0}}
 };
 
 static const uint8_t L_SHAPES[4][MATRIX_SIZE][MATRIX_SIZE] = {
     {{0,0,1,0}, {1,1,1,0}, {0,0,0,0}, {0,0,0,0}},
     {{0,1,0,0}, {0,1,0,0}, {0,1,1,0}, {0,0,0,0}},
-    {{0,0,0,0}, {1,1,1,0}, {1,0,0,0}, {0,0,0,0}},
+    {{1,1,1,0}, {1,0,0,0}, {0,0,0,0}, {0,0,0,0}},
     {{1,1,0,0}, {0,1,0,0}, {0,1,0,0}, {0,0,0,0}}
 };
 
@@ -70,22 +72,22 @@ static const uint8_t O_SHAPES[4][MATRIX_SIZE][MATRIX_SIZE] = {
 static const uint8_t S_SHAPES[4][MATRIX_SIZE][MATRIX_SIZE] = {
     {{0,1,1,0}, {1,1,0,0}, {0,0,0,0}, {0,0,0,0}},
     {{0,1,0,0}, {0,1,1,0}, {0,0,1,0}, {0,0,0,0}},
-    {{0,0,0,0}, {0,1,1,0}, {1,1,0,0}, {0,0,0,0}},
+    {{0,1,1,0}, {1,1,0,0}, {0,0,0,0}, {0,0,0,0}},
     {{0,1,0,0}, {0,1,1,0}, {0,0,1,0}, {0,0,0,0}}
 };
 
 static const uint8_t T_SHAPES[4][MATRIX_SIZE][MATRIX_SIZE] = {
     {{0,1,0,0}, {1,1,1,0}, {0,0,0,0}, {0,0,0,0}},
     {{0,1,0,0}, {0,1,1,0}, {0,1,0,0}, {0,0,0,0}},
-    {{0,0,0,0}, {1,1,1,0}, {0,1,0,0}, {0,0,0,0}},
+    {{1,1,1,0}, {0,1,0,0}, {0,0,0,0}, {0,0,0,0}},
     {{0,1,0,0}, {1,1,0,0}, {0,1,0,0}, {0,0,0,0}}
 };
 
 static const uint8_t Z_SHAPES[4][MATRIX_SIZE][MATRIX_SIZE] = {
     {{1,1,0,0}, {0,1,1,0}, {0,0,0,0}, {0,0,0,0}},
     {{0,0,1,0}, {0,1,1,0}, {0,1,0,0}, {0,0,0,0}},
-    {{0,0,0,0}, {1,1,0,0}, {0,1,1,0}, {0,0,0,0}},
-    {{0,1,0,0}, {0,1,1,0}, {1,0,0,0}, {0,0,0,0}}
+    {{1,1,0,0}, {0,1,1,0}, {0,0,0,0}, {0,0,0,0}},
+    {{0,1,0,0}, {0,1,1,0}, {1,0,0,0}, {0,0,0,0}}  
 };
 
 
@@ -94,7 +96,8 @@ static const uint8_t Z_SHAPES[4][MATRIX_SIZE][MATRIX_SIZE] = {
 class GameBoard {
 private:
     uint8_t cells[GAME_BOARD_HEIGHT][GAME_BOARD_WIDTH];
-    
+    bool isLineFull(uint8_t line) const;
+    void clearLine(uint8_t line);
 public:
     GameBoard();
     ~GameBoard();
@@ -110,14 +113,9 @@ public:
     void handleSetup();
     void handleCheckLines();
     void handleReset();
-    
-private:
-    bool isLineFull(uint8_t line) const;
-    void clearLine(uint8_t line);
 };
 
 /*=============================== BLOCK =======================================*/
-/*Manager current block, move, rotate*/
 class Block {
 private:
     int8_t x, y;
@@ -142,6 +140,7 @@ public:
     bool moveRight(const GameBoard& board);
     bool moveDown(const GameBoard& board);
     void hardDrop(const GameBoard& board);
+    //bool moveUp(const GameBoard& board);
     
     // Event handlers
     void handleSetup(BlockType blockType);
@@ -152,6 +151,8 @@ public:
     void handleHardDrop(const GameBoard& board);
     void handleLock(GameBoard& board);
     void handleReset();
+
+    //void handleMoveUp(const GameBoard& board);
     
     // Getters
     int8_t getX() const { return x; }
@@ -166,7 +167,6 @@ private:
 
 
 /*=============================== GAME STATE =======================================*/
-
 class GameState {
 private:
     uint32_t score;
@@ -182,6 +182,7 @@ public:
     void init();
     void reset();
     void addScore(uint8_t lines);
+    void saveScore();
     void drawInfo();
     void drawNextBlock();
     void drawGameOver();
@@ -205,7 +206,6 @@ public:
 };
 
 /*=============================== TETRIS GAME MANAGER =======================================*/
-/*Singleton coordinates the entire game*/
 class TetrisGameManager
 {
 private:
