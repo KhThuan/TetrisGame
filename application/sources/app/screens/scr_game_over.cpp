@@ -1,9 +1,10 @@
 #include "scr_game_over.h"
+#include "tt_game_block.h"
 
 /*****************************************************************************/
 /* Variable Declaration - game over */
 /*****************************************************************************/
-static ar_game_score_t gamescore;
+static tt_game_score_t gamescore;
 
 /*****************************************************************************/
 /* View - game over */
@@ -27,9 +28,9 @@ view_screen_t scr_game_over = {
 
 void view_scr_game_over() {
 	// Screen
-	view_render.fillScreen(WHITE);
+	view_render.clear();
 	view_render.setTextSize(2);
-	view_render.setTextColor(BLACK);
+	view_render.setTextColor(WHITE);
 	view_render.setCursor(11, 10);
 	view_render.print("GAME OVER");
 	view_render.setTextSize(1);
@@ -39,9 +40,9 @@ void view_scr_game_over() {
 	view_render.setCursor(81, 35);
 	view_render.print(gamescore.score_now);
 	// Icon
-	view_render.drawBitmap(10, 	48,	icon_restart,	15,	15,	0);
-	view_render.drawBitmap(55, 	50,	icon_charts,	17,	15,	0);
-	view_render.drawBitmap(100,	48,	icon_go_home,	16,	16,	0);
+	view_render.drawBitmap(10, 	48,	icon_restart,	15,	15,	WHITE);
+	view_render.drawBitmap(55, 	50,	icon_charts,	17,	15,	WHITE);
+	view_render.drawBitmap(100,	48,	icon_go_home,	16,	16,	WHITE);
 }
 
 /*****************************************************************************/
@@ -74,11 +75,10 @@ void scr_game_over_handle(ak_msg_t* msg) {
 						(uint8_t*)&gamescore, \
 						sizeof(gamescore));
 		// Read score play
-		eeprom_read(	EEPROM_SCORE_PLAY_ADDR, \
-						(uint8_t*)&gamescore.score_now, \
-						sizeof(gamescore.score_now));
+		gamescore.score_now = getTetrisGameManager() -> getState() -> getScore();
 		// Reorganize
 		rank_ranking();
+		timer_remove_attr(AC_TASK_DISPLAY_ID, AC_DISPLAY_SHOW_IDLE);
 	}
 		break;
 
@@ -88,9 +88,9 @@ void scr_game_over_handle(ak_msg_t* msg) {
 		eeprom_write(	EEPROM_SCORE_START_ADDR, \
 						(uint8_t*)&gamescore, \
 						sizeof(gamescore));
+		getTetrisGameManager()->handleGameReset();
 		SCREEN_TRAN(scr_menu_game_handle, &scr_menu_game);
 	}
-		BUZZER_PlayTones(tones_cc);
 		break;
 
 	case AC_DISPLAY_BUTTON_UP_RELEASED: {
@@ -101,7 +101,6 @@ void scr_game_over_handle(ak_msg_t* msg) {
 						sizeof(gamescore));
 		SCREEN_TRAN(scr_charts_game_handle, &scr_charts_game );
 	}
-		BUZZER_PlayTones(tones_cc);
 		break;
 
 	case AC_DISPLAY_BUTTON_DOWN_RELEASED: {
@@ -112,7 +111,6 @@ void scr_game_over_handle(ak_msg_t* msg) {
 						sizeof(gamescore));
 		SCREEN_TRAN(scr_tetris_game_handle, &scr_tetris_game );
 	}	
-		BUZZER_PlayTones(tones_cc);
 		break;
 
 	default:
