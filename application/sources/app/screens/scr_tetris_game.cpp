@@ -39,13 +39,9 @@ void scr_tetris_game_handle(ak_msg_t* msg) {
     switch (msg->sig) {
         case SCREEN_ENTRY: {
             APP_DBG_SIG("TETRIS_SCREEN_ENTRY\n");
-    
-            // Chỉ setup state và board, KHÔNG setup block ở đây
             game->getState()->handleSetup();
             task_post_pure_msg(TT_GAME_BOARD_ID, TT_GAME_BOARD_SETUP);
-            
-            // Spawn block đầu tiên qua message
-            task_post_pure_msg(TT_GAME_SCREEN_ID, TT_GAME_SPAWN_BLOCK);
+            game -> handleSpawnBlock();
             
             tt_game_time_tick_setup();
             tt_game_state = GAME_PLAY;  
@@ -63,15 +59,14 @@ void scr_tetris_game_handle(ak_msg_t* msg) {
         case TT_GAME_SPAWN_BLOCK: {
             APP_DBG_SIG("TT_GAME_SPAWN_BLOCK\n");
             game->handleSpawnBlock();
+            task_post_pure_msg(TT_GAME_STATE_ID, TT_GAME_STATE_CHECK_GAME_OVER);
         }
         break;
         
         case TT_GAME_OVER: {
             APP_DBG_SIG("TT_GAME_OVER\n");
             tt_game_state = GAME_OVER;
-            timer_remove_attr(AC_TASK_DISPLAY_ID, TT_GAME_TIME_TICK);
-            
-            tt_game_time_tick_setup();
+    
         }
         break;
         
@@ -79,10 +74,9 @@ void scr_tetris_game_handle(ak_msg_t* msg) {
             APP_DBG_SIG("TT_GAME_EXIT_GAME\n");
             
             tt_game_state = GAME_OFF;
-            game->handleGameReset();
             
             // Return to menu
-            SCREEN_TRAN(scr_menu_game_handle, &scr_menu_game);
+            SCREEN_TRAN(scr_game_over_handle, &scr_game_over);
         }
         break;
         
@@ -96,14 +90,6 @@ void scr_tetris_game_handle(ak_msg_t* msg) {
             }
         }
         break;
-        
-        case AC_DISPLAY_BUTTON_MODE_LONG_PRESSED: {
-            APP_DBG_SIG("AC_DISPLAY_BUTTON_MODE_LONG_PRESSED\n");
-            if (!game->getState()->getIsGameOver()) {
-                task_post_pure_msg(TT_GAME_BLOCK_ID, TT_GAME_BLOCK_HARD_DROP);
-            }
-        }
-        break;
 
         //Move right
         case AC_DISPLAY_BUTTON_UP_RELEASED: {
@@ -113,25 +99,10 @@ void scr_tetris_game_handle(ak_msg_t* msg) {
             }
         }
         break;
-        case AC_DISPLAY_BUTTON_UP_LONG_PRESSED: {
-            APP_DBG_SIG("AC_DISPLAY_BUTTON_UP_LONG_PRESSED\n");
-            if (!game->getState()->getIsGameOver()) {
-                task_post_pure_msg(TT_GAME_BLOCK_ID, TT_GAME_BLOCK_MOVE_RIGHT);
-            }
-        }
-        break;
 
         //Move left
         case AC_DISPLAY_BUTTON_DOWN_RELEASED: {
             APP_DBG_SIG("AC_DISPLAY_BUTTON_DOWN_RELEASED\n");
-            if (!game->getState()->getIsGameOver()) {
-                task_post_pure_msg(TT_GAME_BLOCK_ID, TT_GAME_BLOCK_MOVE_LEFT);
-            }
-        }
-        break;
-        
-        case AC_DISPLAY_BUTTON_DOWN_LONG_PRESSED: {
-            APP_DBG_SIG("AC_DISPLAY_BUTTON_DOWN_LONG_PRESSED\n");
             if (!game->getState()->getIsGameOver()) {
                 task_post_pure_msg(TT_GAME_BLOCK_ID, TT_GAME_BLOCK_MOVE_LEFT);
             }
