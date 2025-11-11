@@ -1,4 +1,4 @@
-# Tetris Game - Build on AK Embedded Base Kit
+# Archery Game - Build on AK Embedded Base Kit
 
 ## I. Giới thiệu
 
@@ -18,23 +18,23 @@ KIT cũng tích hợp **RS485**, **NRF24L01+**, và **Flash** lên đến 32MB, 
 ### 1.2 Mô tả trò chơi và đối tượng
 Phần mô tả sau đây về **“Archery game”** , giải thích cách chơi và cơ chế xử lý của trò chơi. Tài liệu này dùng để tham khảo thiết kế và phát triển trò chơi về sau.
 
-<p align="center"><img src="resources/bin/Menu.png" alt="menu game" width="480"/></p>
+<p align="center"><img src="https://github.com/epcbtech/archery-game/blob/main/resources/images/menu_game.webp" alt="menu game" width="480"/></p>
 <p align="center"><strong><em>Hình 2:</em></strong> Menu game</p>
 
 Trò chơi bắt đầu bằng màn hình **Menu game** với các lựa chọn sau: 
-- **Play:** Chọn vào để bắt đầu chơi game.
-- **Setting:** Chọn vào để cài đặt các thông số của game level (1-10), music (ON/OFF).
+- **Archery Game:** Chọn vào để bắt đầu chơi game.
+- **Setting:** Chọn vào để cài đặt các thông số của game.
 - **Charts:** Chọn vào để xem top 3 điểm cao nhất đạt được.
 - **Exit:** Thoát menu vào màn hình chờ.
 
 
 #### 1.2.1 Các đối tượng (Object) trong game:
-|Đối tượng|Ý nghĩa|
-|---|---|
-|**Tetromino**|Gồm 1 trong 7 khối Tetromino di chuyển từ trên xuống|
-|**Board**|Nơi chứa các Block rơi xuống|
-|**Game State**|Hoạt động dựa trên các tín hiệu|
-|**Tetris Game Manager**|Lớp trung tâm được các task sử dụng trong quá trình xử lý dữ liệu|
+|Đối tượng|Tên đối tượng|Ý nghĩa|
+|---|---|---|
+|**Tetromino**|Block|Gồm 7 khối và di chuyển từ trên xuống|
+|**Board**|Board|Lưới chơi|
+|**Game State**|Trạng thái game|Hoạt động dựa trên các tín hiệu|
+|**Tetris Game Manager**|Lớp quản lý|Lớp trung tâm được các task sử dụng trong quá trình xử lý dữ liệu|
 
 
 #### 1.2.2 Cách chơi game: 
@@ -61,8 +61,10 @@ Trò chơi bắt đầu bằng màn hình **Menu game** với các lựa chọn 
 ## II. Thiết kế - TETRIS GAME
 ### 2.1 Sơ đồ trình tự
 **Sơ đồ trình tự** được sử dụng để mô tả trình tự của các Message và luồng tương tác giữa các đối tượng trong một hệ thống.
-<p align="center"><img src="resources/bin/image.png" alt="menu game" width="480"/></p>
-<p align="center"><strong><em>Hình 2:</em></strong> Sequence after game on</p>
+
+<p align="center"><img src="https://github.com/epcbtech/archery-game/blob/main/resources/images/sequence_object/archery_game_UML.webp" alt="archery game UML" width="720"/></p>
+<p align="center"><strong><em>Hình 5:</em></strong> The sequence diagram</p>
+
 ### Ghi chú:
 **SCREEN_ENTRY:** Cài đặt các đối tượng trong game.
 - TT_GAME_BOARD_SETUP: Thiết lập thông số ban đầu cho Board.
@@ -112,39 +114,51 @@ Việc liệt kê các thuộc tính của đối tượng trong game có các t
 - Giúp xác định cấu trúc dữ liệu phù hợp để lưu trữ thông tin của đối tượng.
 - Khi bạn xác định trước các thuộc tính cần thiết, bạn giảm thiểu khả năng bỏ sót hoặc nhầm lẫn trong việc xử lý và sử dụng các thuộc tính.
 
-#### 2.2 Task và Signal trong game.
-|TASK ID|PRIORITY|HANDLER|
-|TT_GAME_BLOCK_ID|TASK_PRI_LEVEL_4|tt_game_block_handle|
-|TT_GAME_BOARD_ID|TASK_PRI_LEVEL_4|tt_game_broad_handle|
-|TT_GAME_STATE_ID|TASK_PRI_LEVEL_4|tt_game_state_handle|
-|TT_GAME_SCREEN_ID|TASK_PRI_LEVEL_4|scr_tetris_game_handle|
+**Trạng thái** của một đối tượng được biểu diễn bởi các **thuộc tính**. Trong trò chơi này các đối tượng có các thuộc tính cụ thể là:
+- **visible:** Quy định hiển thị, ẩn/hiện của đối tượng.
+- **x, y:** Quy định vị trí của đối tượng trên màn hình.
+- **action_image:** Quy định hoạt ảnh tạo animation.
 
-Task ID: Mỗi task được tạo ra cho một đối tượng khác nhau trong hệ thống và có nhiệm vụ nhận các công việc khác nhau. Các task hoàn toàn tách biệt luồng logic với nhau.
+Ví dụ:
 
-Priority: Mức độ ưu tiên của các task. Các task có cùng độ ưu tiên đều có sự kiện thì hệ thống xử lý task nào vào trước.
+    typedef struct {
+        bool visible;
+        uint32_t x, y;
+        uint8_t action_image;
+    } ar_game_archery_t;
 
-Handler: Nơi xử lí các tín hiệu của sự kiện khi xảy ra tác động.
+    extern ar_game_archery_t archery;
 
-Signal: Mỗi task sẽ có nhiều signal khác nhau nhằm mục đích xử lí các nhiệm vụ khác nhau của mỗ đối tượng.
+**Áp dụng struct cho các đối tượng:**
+|struct|Các biến|
+|------|--------|
+|ar_game_archery_t|archery|
+|ar_game_arrow_t|arrow[MAX_NUM_ARROW]|
+|ar_game_bang_t|bang[NUM_BANG]|
+|ar_game_border_t|border|
+|ar_game_meteoroid_t|meteoroid[NUM_METEOROIDS]|
 
-Có 2 loại Messenger khác nhau:
-- Loại chỉ mang theo signal không chứa data.
-- Loại chứa cả signal và data.
+**(*)** Các đối tượng có số lượng nhiều thì sẽ được khai báo dạng mảng.
 
+**Các biến quan trọng:**
+- **ar_game_score:** Điểm của trò chơi.
+- **ar_game_status:** Trạng thái quả trò chơi.
+  - GAME_OFF: Tắt .
+  - GAME_ON: Bật.
+  - GAME_OVER: Đã thua.
 
-Game được chia làm 3 phần chính:
-
-**Phần 1**: Quá trình cài đặt thông số cho các đối tượng trong game và timer cho đối tượng trong game.
-
-**Phần 2**: Quá trình bắt đầu game chạy.
-
-
-**Phần 3**: Quá trình game kết thúc.
+- **ar_game_setting_t** settingsetup : Cấu hình cấp độ của trò chơi.
+  - settingsetup.silent : Bật/tắt chế độ im lặng.
+  - settingsetup.num_arrow : Cấu hình số lượng mũi tên.
+  - settingsetup.arrow_speed : Cấu hình tốc độ mũi tên.
+  - settingsetup.meteoroid_speed : Cấu hình tốc độ của thiên thạch.
 
 ## III. Hướng dẫn chi tiết code trong đối tượng
 ### 3.1 Block
 **Sequence diagram:**
 
+<p align="center"><img src="https://github.com/epcbtech/archery-game/blob/main/resources/images/sequence_object/archery_sequence.webp" alt="archery sequence" width="640"/></p>
+<p align="center"><strong><em>Hình 8:</em></strong> Archery sequence</p>
 
 **Tóm tắt nguyên lý:** Tetris sẽ nhận Signal thông được gửi từ 2 nguồn là Screen và Button. Quá trình xử lý của đối tượng phần làm 3 giai đoạn:
 - **Giai đoạn 1:** Bắt đầu game, cài đặt các thông số của Tetris như vị trí và hình ảnh.
@@ -187,7 +201,7 @@ Game được chia làm 3 phần chính:
 
 Trong trò chơi, màn hình hiện thị là 1 màn hình **LCD OLed 1.3"** có kích thước là **128px*64px**. Nên các đối tượng được hiển thị trong game phải có kích thước hiển thị phù hợp với màn hình nên cần được thiết kế riêng. 
 
-Đồ họa được thiết kế từng phần theo từng đối tượng bằng phần mềm [Photopea](https://www.photopea.com/)
+Đồ họa được thiết kế từng phần theo từng đối tượng bằng phần mềm [Pixilart](https://www.pixilart.com/)
 
 #### 4.1.1 Thiết kế đồ họa cho các đối tượng
 
@@ -524,5 +538,4 @@ static const Tone_TypeDef tones_merryChristmas[] = {
 
 </details>
 
-**Ghi chú:** Nếu không có thời gian hoặc không có khiếu âm nhạc thì tốt nhất nên dùng các thư viện trên github
 # TetrisGame
