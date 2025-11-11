@@ -16,13 +16,13 @@ KIT tích hợp LCD **OLED 1.3", 3 nút nhấn, và 1 loa Buzzer phát nhạc**,
 KIT cũng tích hợp **RS485**, **NRF24L01+**, và **Flash** lên đến 32MB, thích hợp cho prototype các ứng dụng thực tế trong hệ thống nhúng hay sử dụng như: truyền thông có dây, không dây wireless, các ứng dụng lưu trữ data logger,...
 
 ### 1.2 Mô tả trò chơi và đối tượng
-Phần mô tả sau đây về **“Archery game”** , giải thích cách chơi và cơ chế xử lý của trò chơi. Tài liệu này dùng để tham khảo thiết kế và phát triển trò chơi về sau.
+Phần mô tả sau đây về **“Tetris game”** , giải thích cách chơi và cơ chế xử lý của trò chơi. Tài liệu này dùng để tham khảo thiết kế và phát triển trò chơi về sau.
 
 <p align="center"><img src="https://github.com/KhThuan/TetrisGame/blob/main/resources/bin/screen_menu.png" alt="Menu game" width="480"/></p>
 <p align="center"><strong><em>Hình 2:</em></strong> Menu game</p>
 
 Trò chơi bắt đầu bằng màn hình **Menu game** với các lựa chọn sau: 
-- **Archery Game:** Chọn vào để bắt đầu chơi game.
+- **:** Chọn vào để bắt đầu chơi game.
 - **Setting:** Chọn vào để cài đặt các thông số của game.
 - **Charts:** Chọn vào để xem top 3 điểm cao nhất đạt được.
 - **Exit:** Thoát menu vào màn hình chờ.
@@ -114,44 +114,16 @@ Việc liệt kê các thuộc tính của đối tượng trong game có các t
 - Giúp xác định cấu trúc dữ liệu phù hợp để lưu trữ thông tin của đối tượng.
 - Khi bạn xác định trước các thuộc tính cần thiết, bạn giảm thiểu khả năng bỏ sót hoặc nhầm lẫn trong việc xử lý và sử dụng các thuộc tính.
 
-**Trạng thái** của một đối tượng được biểu diễn bởi các **thuộc tính**. Trong trò chơi này các đối tượng có các thuộc tính cụ thể là:
-- **visible:** Quy định hiển thị, ẩn/hiện của đối tượng.
-- **x, y:** Quy định vị trí của đối tượng trên màn hình.
-- **action_image:** Quy định hoạt ảnh tạo animation.
-
-Ví dụ:
-
-    typedef struct {
-        bool visible;
-        uint32_t x, y;
-        uint8_t action_image;
-    } ar_game_archery_t;
-
-    extern ar_game_archery_t archery;
-
-**Áp dụng struct cho các đối tượng:**
-|struct|Các biến|
-|------|--------|
-|ar_game_archery_t|archery|
-|ar_game_arrow_t|arrow[MAX_NUM_ARROW]|
-|ar_game_bang_t|bang[NUM_BANG]|
-|ar_game_border_t|border|
-|ar_game_meteoroid_t|meteoroid[NUM_METEOROIDS]|
-
-**(*)** Các đối tượng có số lượng nhiều thì sẽ được khai báo dạng mảng.
-
 **Các biến quan trọng:**
-- **ar_game_score:** Điểm của trò chơi.
-- **ar_game_status:** Trạng thái quả trò chơi.
+- **tt_game_score:** Điểm của trò chơi.
+- **tt_game_status:** Trạng thái quả trò chơi.
   - GAME_OFF: Tắt .
   - GAME_ON: Bật.
   - GAME_OVER: Đã thua.
 
-- **ar_game_setting_t** settingsetup : Cấu hình cấp độ của trò chơi.
+- **tt_game_setting_t** settingsetup : Cấu hình cấp độ của trò chơi.
   - settingsetup.silent : Bật/tắt chế độ im lặng.
-  - settingsetup.num_arrow : Cấu hình số lượng mũi tên.
-  - settingsetup.arrow_speed : Cấu hình tốc độ mũi tên.
-  - settingsetup.meteoroid_speed : Cấu hình tốc độ của thiên thạch.
+  - settingsetup.block_speed : Cấu hình tốc độ các khối tetromino
 
 ## III. Hướng dẫn chi tiết code trong đối tượng
 ### 3.1 Block
