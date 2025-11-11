@@ -18,7 +18,7 @@ KIT cũng tích hợp **RS485**, **NRF24L01+**, và **Flash** lên đến 32MB, 
 ### 1.2 Mô tả trò chơi và đối tượng
 Phần mô tả sau đây về **“Archery game”** , giải thích cách chơi và cơ chế xử lý của trò chơi. Tài liệu này dùng để tham khảo thiết kế và phát triển trò chơi về sau.
 
-<p align="center"><img src="resources/bin/screen_menu.png" alt="menu game" width="480"/></p>
+<p align="center"><img src="https://github.com/KhThuan/TetrisGame/blob/main/resources/bin/screen_menu.png" alt="Menu game" width="480"/></p>
 <p align="center"><strong><em>Hình 2:</em></strong> Menu game</p>
 
 Trò chơi bắt đầu bằng màn hình **Menu game** với các lựa chọn sau: 
@@ -62,8 +62,8 @@ Trò chơi bắt đầu bằng màn hình **Menu game** với các lựa chọn 
 ### 2.1 Sơ đồ trình tự
 **Sơ đồ trình tự** được sử dụng để mô tả trình tự của các Message và luồng tương tác giữa các đối tượng trong một hệ thống.
 
-<p align="center"><img src="https://github.com/epcbtech/archery-game/blob/main/resources/images/sequence_object/archery_game_UML.webp" alt="archery game UML" width="720"/></p>
-<p align="center"><strong><em>Hình 5:</em></strong> The sequence diagram</p>
+<p align="center"><img src="https://github.com/KhThuan/TetrisGame/blob/main/resources/bin/image.png" alt="aTetris game UML" width="720"/></p>
+<p align="center"><strong><em>Hình 3:</em></strong> The sequence diagram</p>
 
 ### Ghi chú:
 **SCREEN_ENTRY:** Cài đặt các đối tượng trong game.
@@ -157,8 +157,8 @@ Ví dụ:
 ### 3.1 Block
 **Sequence diagram:**
 
-<p align="center"><img src="resources/bin/sequence_block.png" alt="archery sequence" width="640"/></p>
-<p align="center"><strong><em>Hình 8:</em></strong> Archery sequence</p>
+<p align="center"><img src="https://github.com/KhThuan/TetrisGame/blob/main/resources/bin/sequence_block.png" alt="Block sequence" width="640"/></p>
+<p align="center"><strong><em>Hình 4:</em></strong> Block sequence</p>
 
 **Tóm tắt nguyên lý:** Tetris sẽ nhận Signal thông được gửi từ 2 nguồn là Screen và Button. Quá trình xử lý của đối tượng phần làm 3 giai đoạn:
 - **Giai đoạn 1:** Bắt đầu game, cài đặt các thông số của Tetris như vị trí và hình ảnh.
@@ -174,8 +174,8 @@ Ví dụ:
 
 **Sequence diagram:**
 
-<p align="center"><img src="resources/bin/sequence_board.png" alt="archery sequence" width="640"/></p>
-<p align="center"><strong><em>Hình 8:</em></strong> Archery sequence</p>
+<p align="center"><img src="https://github.com/KhThuan/TetrisGame/blob/main/resources/bin/squence_board.png" alt="board sequence" width="640"/></p>
+<p align="center"><strong><em>Hình 5:</em></strong> Board sequence</p>
 
 **Tóm tắt nguyên lý:** Board sẽ nhận Signal thông được gửi từ 2 nguồn là Screen và Block. Quá trình xử lý của đối tượng phần làm 3 giai đoạn:
 - **Giai đoạn 1:** Bắt đầu game, cài đặt các thông số của Board.
@@ -187,8 +187,8 @@ Ví dụ:
 
 **Sequence diagram:**
 
-<p align="center"><img src="resources/bin/sequence_state.png" alt="archery sequence" width="640"/></p>
-<p align="center"><strong><em>Hình 8:</em></strong> Archery sequence</p>
+<p align="center"><img src="https://github.com/KhThuan/TetrisGame/blob/main/resources/bin/squence_state.png" alt="State sequence" width="640"/></p>
+<p align="center"><strong><em>Hình 6:</em></strong>State sequence</p>
 
 **Tóm tắt nguyên lý:** GameState sẽ nhận Signal từ Screen.
 
