@@ -1,4 +1,4 @@
-# Archery Game - Build on AK Embedded Base Kit
+# Tetris Game - Build on AK Embedded Base Kit
 
 ## I. Giới thiệu
 
