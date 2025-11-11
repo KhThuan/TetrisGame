@@ -18,7 +18,7 @@ KIT cũng tích hợp **RS485**, **NRF24L01+**, và **Flash** lên đến 32MB, 
 ### 1.2 Mô tả trò chơi và đối tượng
 Phần mô tả sau đây về **“Archery game”** , giải thích cách chơi và cơ chế xử lý của trò chơi. Tài liệu này dùng để tham khảo thiết kế và phát triển trò chơi về sau.
 
-<p align="center"><img src="https://github.com/epcbtech/archery-game/blob/main/resources/images/menu_game.webp" alt="menu game" width="480"/></p>
+<p align="center"><img src="resources/bin/screen_menu.png" alt="menu game" width="480"/></p>
 <p align="center"><strong><em>Hình 2:</em></strong> Menu game</p>
 
 Trò chơi bắt đầu bằng màn hình **Menu game** với các lựa chọn sau: 
@@ -157,7 +157,7 @@ Ví dụ:
 ### 3.1 Block
 **Sequence diagram:**
 
-<p align="center"><img src="https://github.com/epcbtech/archery-game/blob/main/resources/images/sequence_object/archery_sequence.webp" alt="archery sequence" width="640"/></p>
+<p align="center"><img src="resources/bin/sequence_block.png" alt="archery sequence" width="640"/></p>
 <p align="center"><strong><em>Hình 8:</em></strong> Archery sequence</p>
 
 **Tóm tắt nguyên lý:** Tetris sẽ nhận Signal thông được gửi từ 2 nguồn là Screen và Button. Quá trình xử lý của đối tượng phần làm 3 giai đoạn:
@@ -174,15 +174,21 @@ Ví dụ:
 
 **Sequence diagram:**
 
+<p align="center"><img src="resources/bin/sequence_board.png" alt="archery sequence" width="640"/></p>
+<p align="center"><strong><em>Hình 8:</em></strong> Archery sequence</p>
+
 **Tóm tắt nguyên lý:** Board sẽ nhận Signal thông được gửi từ 2 nguồn là Screen và Block. Quá trình xử lý của đối tượng phần làm 3 giai đoạn:
 - **Giai đoạn 1:** Bắt đầu game, cài đặt các thông số của Board.
 
-- **Giai đoạn 2:** Chơi game, trong giai đoạn này chia làm 2 hoạt động là:
+- **Giai đoạn 2:** Chơi game, trong giai đoạn này:
   - Cập nhật: Mỗi khi một Block chạm đáy thì board sẽ khóa khối và gọi hàm kiểm tra hàng đầy.
 
 ### 3.3 GameState
 
 **Sequence diagram:**
+
+<p align="center"><img src="resources/bin/sequence_state.png" alt="archery sequence" width="640"/></p>
+<p align="center"><strong><em>Hình 8:</em></strong> Archery sequence</p>
 
 **Tóm tắt nguyên lý:** GameState sẽ nhận Signal từ Screen.
 
@@ -342,7 +348,7 @@ void GameState::drawNextBlock() {
 ### 4.2 Âm thanh
 Âm thành được thiết kế qua website [Arduino Music](https://www.instructables.com/Arduino-Music-From-Sheet-Music/)
 
-Trong khi chơi, để trò chơi thêm phần xinh động và chân thật thì việc có âm thanh là điều cần thiết. 
+Trong khi chơi, để trò chơi thêm phần sinh động và chân thật thì việc có âm thanh là điều cần thiết. 
 
 Các âm thanh cần thiết kế: nút nhấn, bắn tên, vụ nổ, nhạc game.
 
