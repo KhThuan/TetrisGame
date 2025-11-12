@@ -101,13 +101,7 @@ void GameBoard::handleSetup() {
 //Check row deleted and add score
 void GameBoard::handleCheckLines() {
     uint8_t cleared = checkAndClearLines();
-    if(cleared > 0)
-    {
-        task_post_data(TT_GAME_STATE_ID, 
-                       TT_GAME_STATE_LINES_CLEARED,
-                       &cleared,
-                       sizeof(cleared));
-    }
+    
     if (!getTetrisGameManager()->getState()->getIsGameOver()) {
         task_post_pure_msg(TT_GAME_SCREEN_ID, TT_GAME_SPAWN_BLOCK);
     }
@@ -481,12 +475,6 @@ void tt_game_block_handle(ak_msg_t* msg) {
         case TT_GAME_BLOCK_MOVE_DOWN: {
             APP_DBG_SIG("TT_GAME_BLOCK_MOVE_DOWN\n");
             block->handleMoveDown(*board);
-        }
-        break;
-        
-        case TT_GAME_BLOCK_HARD_DROP: {
-            APP_DBG_SIG("TT_GAME_BLOCK_HARD_DROP\n");
-            block->handleHardDrop(*board);
         }
         break;
         
