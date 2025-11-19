@@ -98,7 +98,6 @@ private:
     uint8_t cells[GAME_BOARD_HEIGHT][GAME_BOARD_WIDTH];
     bool isLineFull(uint8_t line) const;
     void clearLine(uint8_t line);
-    void loadShape();
 public:
     GameBoard();
     ~GameBoard();
@@ -161,6 +160,9 @@ public:
     uint8_t getRotation() const { return rotation; }
     BlockType getType() const { return type; }
     bool isVisible() const { return visible; }
+    
+private:
+    void loadShape();
 };
 
 
