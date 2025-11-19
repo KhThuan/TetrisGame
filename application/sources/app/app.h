@@ -149,11 +149,11 @@ enum {
 };
 
 /*****************************************************************************/
-/*  Archery game 'SCREEN' task define
+/*  Tetris game 'SCREEN' task define
  */
 /*****************************************************************************/
 /* define timer */
-#define TT_GAME_TIME_TICK_INTERVAL									(100)
+#define TT_GAME_TIME_TICK_INTERVAL									(700)
 #define TT_GAME_TIME_EXIT_INTERVAL									(300)
 /* define signal */
 enum {
@@ -177,7 +177,7 @@ enum {
 	TT_GAME_BLOCK_ROTATE,
 	TT_GAME_BLOCK_MOVE_LEFT,
 	TT_GAME_BLOCK_MOVE_DOWN,
-	TT_GAME_BLOCK_HARD_DROP,
+	//TT_GAME_BLOCK_HARD_DROP,
 	TT_GAME_BLOCK_MOVE_RIGHT,
 	TT_GAME_BLOCK_LOCK,
 	TT_GAME_BLOCK_RESET,
