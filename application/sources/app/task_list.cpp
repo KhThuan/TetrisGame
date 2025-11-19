@@ -18,7 +18,7 @@ const task_t app_task_table[] = {
 	{AC_TASK_DISPLAY_ID			,	TASK_PRI_LEVEL_4	,	task_display		},
 
 	/*************************************************************************/
-	/* ARCHERY GAME */
+	/* TETRIS GAME */
 	/*************************************************************************/
 	{TT_GAME_BLOCK_ID           , TASK_PRI_LEVEL_4  , tt_game_block_handle  },
     {TT_GAME_BOARD_ID           , TASK_PRI_LEVEL_4  , tt_game_board_handle  },
